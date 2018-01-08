@@ -1,0 +1,24 @@
+version: '2'
+services:
+
+  oracle:
+    image: container-registry.oracle.com/database/standard
+    container_name: oracle
+    hostname: oracle
+    ports:
+      - 1527:1521
+      - 5507:4400
+    env_file:
+      - /Users/rachelhughes/Docker/testoraenv.txt
+    shm_size: 8g
+    volumes: 
+      - /Users/rachelhughes/Docker/dva_python/scripts:/opt/oracle/scripts/startup
+
+  python:
+    image: dva_python
+    container_name: python
+    hostname: python
+    volumes:
+      - /Users/rachelhughes/Git:/usr/local/src/mystuff
+    links:
+      - oracle
