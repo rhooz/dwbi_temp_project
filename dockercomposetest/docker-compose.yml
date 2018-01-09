@@ -2,17 +2,18 @@ version: '2'
 services:
 
   oracle:
-    image: container-registry.oracle.com/database/standard
+    image: oracle/database:12.2.0.1-se2
     container_name: oracle
     hostname: oracle
     ports:
-      - 1527:1521
-      - 5507:4400
-    env_file:
-      - /Users/rachelhughes/Docker/testoraenv.txt
+      - 1521:1521
+      - 5500:5500
+    environment:
+       ORACLE_SID: "RHTestDB"
+       ORACLE_PWD: "D4V!t4T3st"
     shm_size: 8g
     volumes: 
-      - /Users/rachelhughes/Docker/dva_python/scripts:/opt/oracle/scripts/startup
+      - /Users/rachelhughes/github/Davita/dwbi_temp_project/OracleDatabase/samples/customscripts:/opt/oracle/scripts/startup
 
   python:
     image: dva_python

@@ -68,8 +68,6 @@ RUN  yum -y install /tmp/oracle-instantclient*.rpm && \
      echo /usr/lib/oracle/12.1/client64/lib > /etc/ld.so.conf.d/oracle-instantclient12.1.conf && \
      ldconfig
 
-ENV PATH=$PATH:/usr/lib/oracle/12.1/client64/bin
-
 # cleanup
 RUN rm -f v2.15.1.tar.gz
 

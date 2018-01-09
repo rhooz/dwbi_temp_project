@@ -1,4 +1,4 @@
-CONNECT TEST/test@//localhost:1521/CUSTOMSCRIPTS;
+CONNECT readonlyuser/MyPassword;
 -- Create starter set
 CREATE TABLE PEOPLE(name VARCHAR2(10));
 INSERT INTO PEOPLE (name) VALUES ('Larry');
