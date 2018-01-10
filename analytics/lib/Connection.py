@@ -1,6 +1,7 @@
 import pymysql
 import pymssql
 import psycopg2
+import cx_Oracle
 
 class Connection(object):
     """
@@ -27,6 +28,10 @@ class Connection(object):
         # Postgres uses psycopg2
         elif type == "postgres":
             return(psycopg2.connect(host=config['database-server'], port=config['database-port'], user=config['database-user'], password=config['database-password'], database=config['database']))
+        # Oracle uses cx_Oracle
+        elif type == "oracle":
+            dsn_tns = cx_Oracle.makedsn(config['database-server'], config['database-port'], config['database-sid'])
+            return (cx_Oracle.connect(user=config['database-user'],password=config['database-password'], dsn=dsn_tns))
         else:
-            raise TypeError('Invalid datatabse type')
+            raise TypeError('Invalid database type')
     factory = staticmethod(factory)
