@@ -2,7 +2,7 @@
 
 #build the python container
 cd dva_python
-docker build -t dva_python
+docker build -t dva_python .
 cd ../
 
 #build the oracle container
@@ -14,4 +14,3 @@ cd ../..
 #start the docker compose file
 cd dockercomposetest
 docker-compose up
-
