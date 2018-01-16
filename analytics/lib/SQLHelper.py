@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from BQHelper import BQHelper
-from PGHelper import PGHelper
+from ORHelper import PGHelper
 
 class SQLHelper(object):
     """
