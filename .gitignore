@@ -1,3 +1,5 @@
 *.rpm
 *.zip
 .idea
+*.pyc
+*.csv
