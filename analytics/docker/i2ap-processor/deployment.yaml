@@ -1,0 +1,221 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: processor
+  name: processor
+  namespace: i2ap
+spec:
+  replicas: 5
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: processor
+    spec:
+      containers:
+      - name: cloudsql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.09
+        command: ["/cloud_sql_proxy", "--dir=/cloudsql",
+          "-instances=tt-cust-analytics:us-west1:tt-cust-analytics-mysql=tcp:3306,tt-cust-analytics:us-west1:tt-cust-analytics-postgres=tcp:127.0.0.1:5432",
+          "-credential_file=/secrets/cloudsql/credentials.json"]
+        volumeMounts:
+          - name: cloudsql-instance-credentials
+            mountPath: /secrets/cloudsql
+            readOnly: true
+          - name: ssl-certs
+            mountPath: /etc/ssl/certs
+          - name: cloudsql
+            mountPath: /cloudsql
+      - name: processor
+        image: us.gcr.io/tt-cust-analytics/i2ap-processor:1.0.22
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3101
+          name: processor
+        env:
+        - name: I2AP_PROJECT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.project-id
+        - name: I2AP_ZONE
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.zone
+        - name: I2AP_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.region
+        - name: I2AP_STAGE_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.stage-bucket
+        - name: I2AP_ARCHIVE_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.archive-bucket
+        - name: I2AP_STATE_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.state-bucket
+        - name: I2AP_GRAPH_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.graph-bucket
+        - name: I2AP_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.port
+        - name: I2AP_OVERRIDE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.override-port
+        - name: I2AP_DATASET
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.dataset
+        - name: I2AP_DDL_DIRECTORY
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.ddl-directory
+        - name: I2AP_LIB_DIRECTORY
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.lib-directory
+        - name: I2AP_SQL_DIRECTORY
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.sql-directory
+        - name: I2AP_DATA_SERVICE
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.data-service
+        - name: I2AP_MART_TYPE
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.database-type
+        - name: I2AP_MART_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.database-server
+        - name: I2AP_MART_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.database-port
+        - name: I2AP_MART_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.database
+        - name: I2AP_LOG_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.log-name
+        - name: I2AP_MART_USER
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-mart-access
+              key: database-user
+        - name: I2AP_MART_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-mart-access
+              key: database-password
+        - name: I2AP_SALESFORCE_USER
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-salesforce-access
+              key: salesforce-user
+        - name: I2AP_SALESFORCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-salesforce-access
+              key: salesforce-password
+        - name: I2AP_SALESFORCE_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-salesforce-access
+              key: salesforce-token
+        - name: I2AP_SALESFORCE_SANDBOX
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-salesforce-access
+              key: salesforce-sandbox
+        - name: I2AP_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-service-access
+              key: client-id
+        - name: I2AP_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-service-access
+              key: client-secret
+        - name: I2AP_EMAIL_ID
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-email
+              key: email-id
+        - name: I2AP_EMAIL_NAME
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-email
+              key: email-name
+        - name: I2AP_EMAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-email
+              key: password
+        - name: GOOGLE_STORAGE_ID
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-gs-access
+              key: client-id
+        - name: GOOGLE_STORAGE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-gs-access
+              key: client-secret
+        volumeMounts:
+          - name: i2ap-glcoud-credentials
+            mountPath: /secrets
+            readOnly: true
+          - name: email
+            mountPath: /email
+            readOnly: true
+      volumes:
+        - name: i2ap-glcoud-credentials
+          secret:
+            secretName: i2ap-glcoud-credentials
+        - name: email
+          configMap:
+            name: email
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
+        - name: ssl-certs
+          hostPath:
+            path: /etc/ssl/certs
+        - name: cloudsql
+          emptyDir:

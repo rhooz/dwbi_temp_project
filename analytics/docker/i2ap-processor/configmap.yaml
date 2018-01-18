@@ -1,0 +1,44 @@
+apiVersion: v1
+metadata:
+  name: processor
+  namespace: i2ap
+data:
+  # glcoud project id
+  i2ap.project-id: "tt-cust-analytics"
+  # glcoud stage bucket
+  i2ap.region: "us-west1"
+  # glcoud stage bucket
+  i2ap.zone: "us-west1-c"
+  # glcoud stage bucket
+  i2ap.stage-bucket: "tt-cust-analytics-stage-dev"
+  # glcoud state bucket
+  i2ap.state-bucket: "tt-cust-analytics-state"
+  # gcloud archive bucket
+  i2ap.archive-bucket: "tt-cust-analytics-archive-dev"
+  # gcloud graph bucket
+  i2ap.graph-bucket: "tt-cust-analytics-graphs"
+  # i2ap service port
+  i2ap.port: "3101"
+  # i2ap debugging override port
+  i2ap.override-port: ""
+  # big query dataset name
+  i2ap.dataset: "analytics_lake"
+  # data processor url
+  i2ap.data-service: "https://processor.analytics.tectonic-cloud.com"
+  # table definition directory
+  i2ap.ddl-directory: "/i2ap-processor/ddl"
+  # business class library directory
+  i2ap.lib-directory: "/i2ap-processor/lib"
+  # sql directory
+  i2ap.sql-directory: "/i2ap-processor/sql"
+  # mart database type
+  i2ap.database-type: "postgres"
+  # mart database server
+  i2ap.database-server: "127.0.0.1"
+  # mart database port
+  i2ap.database-port: "5432"
+  # mart database name
+  i2ap.database: "commix"
+  # data processing log name
+  i2ap.log-name: "processing-log"
+kind: ConfigMap

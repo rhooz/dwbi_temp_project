@@ -1,0 +1,120 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: airflow
+  name: airflow
+  namespace: i2ap
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: airflow
+    spec:
+      containers:
+      - env:
+        - name: AIRFLOW_TYPE
+          value: webserver
+        - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+          valueFrom:
+            secretKeyRef:
+              name: airflow-connection
+              key: connection-string
+        - name: AIRFLOW__CORE__BROKER_URL
+          valueFrom:
+            secretKeyRef:
+              name: airflow-connection
+              key: connection-string
+        - name: AIRFLOW__CORE__CELERY_RESULT_BACKEND
+          valueFrom:
+            secretKeyRef:
+              name: airflow-connection
+              key: connection-string
+        volumeMounts:
+          - name: airflow-config
+            mountPath: /config
+            readOnly: true
+        image: us.gcr.io/tt-cust-analytics/i2ap-airflow:1.0.4
+        name: airflow-webserver
+        ports:
+        - containerPort: 8080
+          name: airflow
+      - env:
+        - name: AIRFLOW_TYPE
+          value: scheduler
+        - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+          valueFrom:
+            secretKeyRef:
+              name: airflow-connection
+              key: connection-string
+        - name: AIRFLOW__CORE__BROKER_URL
+          valueFrom:
+            secretKeyRef:
+              name: airflow-connection
+              key: connection-string
+        - name: AIRFLOW__CORE__CELERY_RESULT_BACKEND
+          valueFrom:
+            secretKeyRef:
+              name: airflow-connection
+              key: connection-string
+        volumeMounts:
+          - name: airflow-config
+            mountPath: /config
+            readOnly: true
+        image: us.gcr.io/tt-cust-analytics/i2ap-airflow:1.0.4
+        name: airflow-scheduler
+      - env:
+        - name: AIRFLOW_TYPE
+          value: worker
+        - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+          valueFrom:
+            secretKeyRef:
+              name: airflow-connection
+              key: connection-string
+        - name: AIRFLOW__CORE__BROKER_URL
+          valueFrom:
+            secretKeyRef:
+              name: airflow-connection
+              key: connection-string
+        - name: AIRFLOW__CORE__CELERY_RESULT_BACKEND
+          valueFrom:
+            secretKeyRef:
+              name: airflow-connection
+              key: connection-string
+        volumeMounts:
+          - name: airflow-config
+            mountPath: /config
+            readOnly: true
+        image: us.gcr.io/tt-cust-analytics/i2ap-airflow:1.0.3
+        name: airflow-worker
+        securityContext:
+          runAsUser: 1000
+      - image: gcr.io/cloudsql-docker/gce-proxy:1.09
+        name: cloudsql-proxy
+        command: ["/cloud_sql_proxy", "--dir=/cloudsql",
+          "-instances=tt-cust-analytics:us-west1:tt-cust-analytics-mysql=tcp:3306",
+          "-credential_file=/secrets/cloudsql/credentials.json"]
+        volumeMounts:
+          - name: cloudsql-instance-credentials
+            mountPath: /secrets/cloudsql
+            readOnly: true
+          - name: ssl-certs
+            mountPath: /etc/ssl/certs
+          - name: cloudsql
+            mountPath: /cloudsql
+      volumes:
+        - name: airflow-config
+          secret:
+            secretName: airflow-config
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
+        - name: ssl-certs
+          hostPath:
+            path: /etc/ssl/certs
+        - name: cloudsql
+          emptyDir:

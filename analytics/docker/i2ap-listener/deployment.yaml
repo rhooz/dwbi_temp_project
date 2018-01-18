@@ -1,0 +1,113 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: listener
+  name: listener
+  namespace: i2ap
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: listener
+    spec:
+      containers:
+      - name: listener
+        image: us.gcr.io/tt-cust-analytics/i2ap-listener:1.0.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3101
+          name: listener
+        env:
+        - name: I2AP_PROJECT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.project-id
+        - name: I2AP_ZONE
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.zone
+        - name: I2AP_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.region
+        - name: I2AP_STAGE_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.stage-bucket
+        - name: I2AP_ARCHIVE_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.archive-bucket
+        - name: I2AP_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.port
+        - name: I2AP_DDL_DIRECTORY
+          valueFrom:
+            configMapKeyRef:
+              name: listener
+              key: i2ap.ddl-directory
+        - name: I2AP_LIB_DIRECTORY
+          valueFrom:
+            configMapKeyRef:
+              name: listener
+              key: i2ap.lib-directory
+        - name: I2AP_OVERRIDE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.override-port
+        - name: I2AP_DATASET
+          valueFrom:
+            configMapKeyRef:
+              name: processor
+              key: i2ap.dataset
+        - name: I2AP_PROCESSOR_SERVICE
+          valueFrom:
+            configMapKeyRef:
+              name: listener
+              key: i2ap.processor-service
+        - name: I2AP_LISTENER_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: listener
+              key: i2ap.listener-topic
+        - name: I2AP_LISTENER_TOPIC_TYPE
+          valueFrom:
+            configMapKeyRef:
+              name: listener
+              key: i2ap.listener-topic-type
+        - name: I2AP_LISTENER_SUBSCRIPTION
+          valueFrom:
+            configMapKeyRef:
+              name: listener
+              key: i2ap.listener-subscription
+        - name: I2AP_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-service-access
+              key: client-id
+        - name: I2AP_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: i2ap-service-access
+              key: client-secret
+        volumeMounts:
+          - name: i2ap-gcloud-credentials
+            mountPath: /secrets
+            readOnly: true
+      volumes:
+        - name: i2ap-gcloud-credentials
+          secret:
+            secretName: i2ap-gcloud-credentials
+

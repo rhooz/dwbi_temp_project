@@ -1,0 +1,17 @@
+# establish the entry point for the external load balancer
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: processor
+  namespace: i2ap
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: "gce"
+spec:
+  tls:
+  - secretName: tls-lego-processor-dev
+    hosts:
+    - processor.analytics.tectonic-cloud.com
+  backend:
+    serviceName: processor-service
+    servicePort: 3101

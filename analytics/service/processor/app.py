@@ -59,15 +59,11 @@ def main():
     parse_command_line()
     logging.info('I2AP Processing Service; starting up...')
     app = tornado.web.Application([
-        ('/Replicate', ReplicatorService, dict(config=config)),
         ('/FileToDb', FileToDbService, dict(config=config)),
         (r'/DbToDb/(?P<jobId>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/?', DbToDbService, dict(config=config)),
         ('/DbToDb', DbToDbService, dict(config=config)),
-        ('/Email', EmailService, dict(config=config)),
         (r'/Sync/(?P<jobId>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/?', SyncService, dict(config=config)),
         ('/Sync', SyncService, dict(config=config)),
-        ('/Graphic', GraphicService, dict(config=config)),
-        ('/Link', LinkService, dict(config=config)),
         ('/', WelcomeService, dict(config=config))
     ])
     try:
