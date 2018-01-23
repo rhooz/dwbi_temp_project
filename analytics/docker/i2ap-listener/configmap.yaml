@@ -1,0 +1,18 @@
+apiVersion: v1
+metadata:
+  name: listener
+  namespace: i2ap
+data:
+  # data processor location
+  i2ap.processor-service: "https://processor.analytics.tectonic-cloud.com"
+  # the type of topic the listener is pulling
+  i2ap.listener-topic-type: "GCS"
+  # pub/sub topic
+  i2ap.listener-topic: "tt-cust-analytics-stage-listen"
+  # pub/sub subscription
+  i2ap.listener-subscription: "tt-cust-analytics-stage-sub"
+  # table definition directory
+  i2ap.ddl-directory: "/i2ap-listener/ddl"
+  # business class library directory
+  i2ap.lib-directory: "/i2ap-listener/lib"
+kind: ConfigMap

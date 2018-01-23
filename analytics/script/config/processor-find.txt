@@ -1,0 +1,1 @@
+{ find lib ddl service/processor -path lib/lib -prune -o -name "*.py" -o -name "*.json" -o -name "*.yaml"; find script -name "*.sh"; }
