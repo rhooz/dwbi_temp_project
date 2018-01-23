@@ -12,14 +12,14 @@ services:
        ORACLE_SID: "RHTestDB"
        ORACLE_PWD: "D4V!t4T3st"
     shm_size: 8g
-    volumes: 
-      - /Users/rachelhughes/github/Davita/dwbi_temp_project/OracleDatabase/samples/customscripts:/opt/oracle/scripts/startup
+    volumes:
+      - /Users/tommymartin/Programming/Davita/dwbi_temp_project/OracleDatabase/samples/customscripts:/opt/oracle/scripts/startup
 
   python:
     image: dva_python
     container_name: python
     hostname: python
     volumes:
-      - /Users/rachelhughes/Git:/usr/local/src/mystuff
+      - /Users/tommymartin/Git:/usr/local/src/mystuff
     links:
       - oracle

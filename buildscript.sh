@@ -14,4 +14,3 @@ cd ../..
 #start the docker compose file
 cd dockercomposetest
 docker-compose up
-
