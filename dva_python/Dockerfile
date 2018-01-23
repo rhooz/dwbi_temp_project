@@ -4,6 +4,8 @@
 FROM centos:latest
 MAINTAINER Tectonic
 
+ADD . /code
+
 # install ssh
 RUN yum -y update
 RUN yum -y install which wget; yum clean all
@@ -60,6 +62,9 @@ RUN pip install --upgrade ujson
 
 # add database libraries
 RUN pip install cx-oracle
+
+# instal python libraries
+RUN pip install -r code/lib/requirements.txt
 
 # build Oracle client
 ADD oracle-instantclient*.rpm /tmp/

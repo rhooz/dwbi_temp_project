@@ -33,8 +33,7 @@ class SQLBase:
                    'database-user': '',
                    'database-password': '',
                    'database': '',
-                   'database-sid': '',
-                   'database-port': '' }
+                   'database-sid': '' }
         """
 
         self.config = config
@@ -42,7 +41,11 @@ class SQLBase:
         self.dbType = config['database-type'] if 'database-type' in config.keys() else None
         self.sqlDir = config['sql-directory'] if 'sql-directory' in config.keys() else None
         self.ddlDir = config['ddl-directory'] if 'ddl-directory' in config.keys() else None
-        self.dataset = config['dataset'] if 'dataset' in config.keys() else None
+
+        # TODO: need to override createDataset (schema)
+        # we currently don't have schemas in our Oracle DB but I assume that will change soon.
+        # need to ensure the dataset works Oracle in every use case
+        self.dataset = config['dataset'] if 'dataset' in config.keys() else ''
         self.logName = config['log-name'] if 'log-name' in config.keys() else None
         self.bucket =  config['stage-bucket'] if 'stage-bucket' in config.keys() else None
         self._dbConfig()
@@ -52,9 +55,9 @@ class SQLBase:
         else:
             self.jobId = jobId
 
-        if self.project:
-            self.gs = GSHelper(self.project)
-            self.sd = SDHelper(self.project, 'salesforce-log', self.jobId)
+        if self.projectId:
+            self.gs = GSHelper(self.projectId)
+            self.sd = SDHelper(self.projectId, 'salesforce-log', self.jobId)
         else:
             # TODO: add integration for any bucket system
             self.gs = None

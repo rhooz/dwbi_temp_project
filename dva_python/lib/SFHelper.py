@@ -156,9 +156,9 @@ class SFHelper:
             schema.append(attr)
 
         # save the ddl to a file if persist is set to true
-        if persist:
-            etl = ETLHelper(self.config)
-            etl.schemaToFile(self.objectName.lower(), schema)
+        # if persist:
+        #     etl = ETLHelper(self.config)
+        #     etl.schemaToFile(self.objectName.lower(), schema)
 
         # return the schema to the caller
         return schema
@@ -380,7 +380,7 @@ class SFHelper:
 
     def query(self, lastUpdateField='systemmodstamp'):
         """query the contents of a single table into a csv"""
-        # TODO: Set up last updated
+        # TODO: Set up lastUpdateField (do we need this?)
 
         # make sure a job is open for processing
         if not self.isStarted:
@@ -545,6 +545,10 @@ class SFHelper:
         loop through the manifest and update the table layouts if they have changed
         then perform the sync action from syncAllTables
         """
+
+        # TODO: get this function working with Oracle Helper class
+        # this function will allow us to update all oracle table instead of one at a time AND
+        # it checks for new or missing columns (I think)
         etl = ETLHelper(self.config)
         s = SQLHelper.factory(self.config, self.config['database-type'])
         for row in self.manifest:
