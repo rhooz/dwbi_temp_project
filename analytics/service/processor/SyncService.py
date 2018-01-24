@@ -12,14 +12,15 @@ class_path = os.environ['I2AP_LIB_DIRECTORY']
 sys.path.append(class_path)
 
 from SFHelper import SFHelper
-from SDHelper import SDHelper
+from LogHelper import LogHelper
 from JobState import JobState
 
 class SyncService(tornado.web.RequestHandler):
     def initialize(self, config):
         self.jobId = str(uuid.uuid4())
         self.config = config
-        self.logger = SDHelper(self.config['project-id'], os.environ['I2AP_LOG_NAME'], jobId=self.jobId)
+        self.logger = LogHelper.factory(self.config['project-id'], type="filelog", jobId=self.jobId,
+                                   destfile='/Users/rachelhughes/testlognew.log')
 
     def verifyToken(self, clientId, clientSecret):
         if clientId == self.config['client-id'] and clientSecret == self.config['client-secret']:

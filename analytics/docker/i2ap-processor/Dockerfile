@@ -75,6 +75,9 @@ RUN rm -f v2.15.1.tar.gz
 RUN pip install simple_salesforce
 RUN pip install salesforce_bulkipy
 
+# add bunyan for file log formatting
+RUN pip install bunyan
+
 # deploy the TT software
 RUN mkdir /i2ap-processor
 COPY i2ap-processor.tar.gz /i2ap-processor/i2ap-processor.tar.gz

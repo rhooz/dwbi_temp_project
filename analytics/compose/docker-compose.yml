@@ -20,9 +20,16 @@ services:
     container_name: processor
     hostname: processor
     volumes:
-      - /Users/rachelhughes/github:/usr/local/src/mystuff
+      - /Users/rachelhughes/github/Davita/dwbi_temp_project/analytics:/usr/local/src/mystuff
     environment:
+      I2AP_PORT: 3101
+      I2AP_OVERRIDE_PORT: 3102
+      I2AP_DDL_DIRECTORY: "/Users/rachelhughes/github/Davita/dwbi_temp_project/analytics/ddl"
       I2AP_LIB_DIRECTORY: "/i2ap-processor/lib"
-
+      I2AP_DATA_SERVICE: "http://localhost"
+      I2AP_FEATURE_PREFIX: "replicate"
+      INTERACTIVE: "false"
+      I2AP_PROJECT_ID: 0
+      I2AP_SALESFORCE_SANDBOX: "true"
   #  links:
   #    - oracle

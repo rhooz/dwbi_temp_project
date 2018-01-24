@@ -11,7 +11,7 @@ import sys
 class_path = os.environ['I2AP_LIB_DIRECTORY']
 sys.path.append(class_path)
 
-from SDHelper import SDHelper
+from LogHelper import LogHelper
 from Transform import Transform
 from JobState import JobState
 
@@ -19,8 +19,8 @@ class DbToDbService(tornado.web.RequestHandler):
     def initialize(self, config):
         self.jobId = str(uuid.uuid4())
         self.config = config
-        self.logger = SDHelper(self.config['project-id'], 'processing-log', jobId=self.jobId)
-
+        self.logger = LogHelper.factory(self.config['project-id'], type="filelog", jobId=self.jobId,
+                                   destfile='/Users/rachelhughes/testlognew.log')
     def verifyToken(self, clientId, clientSecret):
         if clientId == self.config['client-id'] and clientSecret == self.config['client-secret']:
             return True

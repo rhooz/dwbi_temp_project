@@ -1,7 +1,7 @@
 import json
 import datetime
 import os
-from GSHelper import GSHelper
+#from GSHelper import GSHelper
 
 class JobState:
     """maintain state for web services"""

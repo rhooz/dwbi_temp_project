@@ -4,9 +4,9 @@ import uuid
 import os
 import io
 
-from GSHelper import GSHelper
+#from GSHelper import GSHelper
 from SQLHelper import SQLHelper
-from SDHelper import SDHelper
+from LogHelper import LogHelper
 from JobState import JobState
 
 class Transform:
@@ -33,9 +33,10 @@ class Transform:
 
         self.config = config
         self.maintainState = maintainState
-        self.gs = GSHelper(self.project)
+        #self.gs = GSHelper(self.project)
         self.bq = SQLHelper.factory(self.config, dbType, jobId=self.jobId)
-        self.logger = SDHelper(self.project, 'processing-log', jobId=self.jobId)
+        self.logger = LogHelper.factory(self.config['project-id'], type="filelog", jobId=self.jobId,
+                                   destfile='/Users/rachelhughes/testlognew.log')
         self.ddlDir = config['ddl-directory']
         self.sqlDir = config['sql-directory']
 
