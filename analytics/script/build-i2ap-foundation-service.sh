@@ -4,9 +4,14 @@ declare -a validServices=("airflow" "listener" "processor")
 DESIRED_SERVICE=''
 # make sure it is executed from project root
 PROJECT_ROOT=`git rev-parse --show-toplevel`
-GCLOUD_PROJECT="tt-cust-"`basename $PROJECT_ROOT`
-GCLOUD_CLUSTER=$GCLOUD_PROJECT"-kube"
+PROJECT_ROOT=$PROJECT_ROOT"/analytics"
+
+
+#GCLOUD_PROJECT="tt-cust-"`basename $PROJECT_ROOT`
+#GCLOUD_CLUSTER=$GCLOUD_PROJECT"-kube"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo "PROJECT_ROOT = "$PROJECT_ROOT
+echo "SCRIPT_DIR = "$SCRIPT_DIR
 
 function createSourceTarBall ()
 {
@@ -42,7 +47,7 @@ function buildDockerImage()
     fi
 }
 
-function deployService()
+function :yService()
 {
     echo "deployService"
     cd ${PROJECT_ROOT}
@@ -199,8 +204,8 @@ do
   esac
 done
 
-gcloud config set project $GCLOUD_PROJECT
-kubectl config set-cluster $GCLOUD_CLUSTER
+#gcloud config set project $GCLOUD_PROJECT
+#kubectl config set-cluster $GCLOUD_CLUSTER
 #
 
 summarizeSettings
@@ -208,7 +213,7 @@ summarizeSettings
 cd $PROJECT_ROOT
 createSourceTarBall
 buildDockerImage
-deployService
+#deployService
 
 echo "Done with "$0" -s "$DESIRED_SERVICE" execution"
 

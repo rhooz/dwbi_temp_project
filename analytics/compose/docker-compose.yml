@@ -1,0 +1,28 @@
+version: '2'
+services:
+
+ # oracle:
+ #   image: oracle/database:12.2.0.1-se2
+ #   container_name: oracle
+ #   hostname: oracle
+ #   ports:
+ #     - 1521:1521
+ #     - 5500:5500
+ #   environment:
+ #      ORACLE_SID: "RHTestDB"
+ #      ORACLE_PWD: "D4V!t4T3st"
+ #   shm_size: 8g
+ #   volumes:
+ #     - /Users/rachelhughes/github/Davita/dwbi_temp_project/OracleDatabase/samples/customscripts:/opt/oracle/scripts/startup
+
+  processor:
+    image: us.gcr.io/tt-cust-analytics/i2ap-processor:1.0.27
+    container_name: processor
+    hostname: processor
+    volumes:
+      - /Users/rachelhughes/github:/usr/local/src/mystuff
+    environment:
+      I2AP_LIB_DIRECTORY: "/i2ap-processor/lib"
+
+  #  links:
+  #    - oracle

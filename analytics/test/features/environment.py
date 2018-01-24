@@ -3,8 +3,8 @@ import os
 
 class_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
 sys.path.append(class_path)
-from GSHelper import *
-from BQHelper import *
+#from GSHelper import *
+#from BQHelper import *
 
 
 # from ddlFlow import *
@@ -44,5 +44,5 @@ def before_all(context):
     else:
         config['salesforce-sandbox'] = False
     context.config = config
-    context.gs = GSHelper(context.project)
-    context.bq = BQHelper(context.config)
+    #context.gs = GSHelper(context.project)
+    #context.bq = BQHelper(context.config)
