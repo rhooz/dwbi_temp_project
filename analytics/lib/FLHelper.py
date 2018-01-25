@@ -1,14 +1,18 @@
 from LogBase import LogBase
 import bunyan
 import logging
+import re
 #import sys
 
 
 class FLHelper(LogBase):
 
+    "methods to simplify interaction with file logging using Bunyan formatting"
+
     def __init__(self, projectId, loggerName, jobId, destfile):
         self.projectId = projectId
         self.loggerName = loggerName
+        self.destfile = destfile
 
         if jobId is None:
             self.jobId = str(self.jobId)
@@ -51,6 +55,18 @@ class FLHelper(LogBase):
 
         self.filehandler.close()
         return "entry logged"
+
+    def get_entries(self, filterStr, page_size=100):
+        """Returns the most recent entries for a given logger subject to the filterString."""
+        entries = []
+        for json_data in reversed(open(self.destfile).readlines()):
+            if re.search(filterStr, json_data):
+                entries.append(json_data)
+        return entries
+
+
+
+
 
 
 

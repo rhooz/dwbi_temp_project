@@ -1,4 +1,5 @@
 from FLHelper import FLHelper
+from SDHelper import SDHelper
 
 class LogHelper(object):
     """
@@ -7,17 +8,22 @@ class LogHelper(object):
 
     def factory(projectId, type, jobId='',destfile=''):
         """
-        connect to the applicable database by type
-        send in i2ap configuration and database type, the appropriate helper object will be instantiated/returned
+        connect to the applicable logger by type
+        send in logger type, the appropriate helper object will be instantiated/returned
 
-        usage example: s = SQLHelper.factory(myConfig, 'postgres')
+        usage example: s = LogHelper.factory(projectId=20180125, type="filelog",jobId=1,destfile=destfile)
 
-        :param type: the database type
-        :param jobId: the I2AP job Id
+        :param projectId: the project type
+        :param type: the logger type (filelog or
+        :param jobId: the job id
+        :param destfile: the destination location for the log file
+
         :return: I2AP Helper object
         """
         if type == "filelog":
             return(FLHelper(projectId,"filelog",jobId,destfile))
+        elif type == "stackdriver":
+            return(SDHelper(projectId,"stackdriver",jobId))
         else:
             raise TypeError('Invalid logging type')
     factory = staticmethod(factory)
