@@ -67,7 +67,7 @@ services:
       I2AP_SALESFORCE_TOKEN: "pfaNEOAQ0Zchh3a5ETNg7GHhW"
       I2AP_SALESFORCE_SANDBOX: "False"
       I2AP_LOG_FILE: "/i2ap-processor/logfile.log"
-      REMOTE_DEBUG: "10.176.80.205"
+      REMOTE_DEBUG: "10.6.23.143"
       REMOTE_DEBUG_PORT: "51234"
     links:
       - oracle

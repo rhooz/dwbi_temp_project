@@ -13,6 +13,7 @@ from simple_salesforce import Salesforce
 # from SQLHelper import SQLHelper
 # from JobState import JobState
 from ETLHelper import ETLHelper
+from RemoteDebug import *
 
 class SFHelper:
     """
