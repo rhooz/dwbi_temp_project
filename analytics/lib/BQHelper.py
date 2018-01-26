@@ -447,12 +447,12 @@ class BQHelper(SQLBase):
         Extract data from a table and place it into a csv file in GCS
         :param tableName: the name of the table to load
         """
-        destination = self.bucket + '/temp/' + tableName + '.csv'
-        self.exportDataToGCS(tableName, destination)
+        destination = 'temp/' + tableName + '.csv'
+        self.exportDataToStorage(tableName, destination)
         self.gs.downloadFile(destination, tableName + '.csv')
-        self.gs.deleteFile(self.bucket, 'temp/' + tableName + '.csv')
+        self.gs.deleteFile('temp/' + tableName + '.csv')
 
-    def exportDataToGCS(self, tableName, destination):
+    def exportDataToStorage(self, tableName, destination):
         """
         Extract data from a table and place it into a csv file in GCS
         :param tableName: the name of the table to load
@@ -466,7 +466,7 @@ class BQHelper(SQLBase):
             # wait for the return
             job.result()
         except Exception as exportErr:
-            msg = 'BQHelper.exportDataToGCS: Export of table data failed. Details:' + str(exportErr)
+            msg = 'BQHelper.exportDataToStorage: Export of table data failed. Details:' + str(exportErr)
             logging.error(msg)
             self.logger.logEvent(msg, severity='ERROR', jobstatus='INPROGRESS')
             raise exportErr

@@ -8,8 +8,8 @@ import json
 import abc
 
 from Connection import Connection
-# from GSHelper import GSHelper
-# from SDHelper import SDHelper
+from StorageHelper import StorageHelper
+from SDHelper import SDHelper
 
 class SQLBase:
     """
@@ -21,45 +21,24 @@ class SQLBase:
         constructor
         :param config: i2ap config object
         :param jobId: optional: i2ap job id for logging consistency
-
-        config = { 'project-id': '',
-                   'database-type': '',
-                   'sql-directory': '',
-                   'ddl-directory': '',
-                   'dataset': '',
-                   'log-name': '',
-                   'stage-bucket': '',
-                   'database-server': '',
-                   'database-user': '',
-                   'database-password': '',
-                   'database': '',
-                   'database-sid': '',
-                   'database-port': '' }
         """
 
         self.config = config
-        self.projectId = config['project-id'] if 'project-id' in config.keys() else None
-        self.dbType = config['database-type'] if 'database-type' in config.keys() else None
-        self.sqlDir = config['sql-directory'] if 'sql-directory' in config.keys() else None
-        self.ddlDir = config['ddl-directory'] if 'ddl-directory' in config.keys() else None
-        self.dataset = config['dataset'] if 'dataset' in config.keys() else None
-        self.logName = config['log-name'] if 'log-name' in config.keys() else None
-        self.bucket =  config['stage-bucket'] if 'stage-bucket' in config.keys() else None
+        self.projectId = config['project-id']
+        self.dbType = config['database-type']
+        self.sqlDir = config['sql-directory']
+        self.ddlDir = config['ddl-directory']
+        self.dataset = config['dataset']
+        self.logName = config['log-name']
+        self.bucket =  config['stage-bucket']
         self._dbConfig()
 
         if jobId == '':
             self.jobId = uuid.uuid4()
         else:
             self.jobId = jobId
-
-        if self.project:
-            self.gs = GSHelper(self.project)
-            self.sd = SDHelper(self.project, 'salesforce-log', self.jobId)
-        else:
-            # TODO: add integration for any bucket system
-            self.gs = None
-            # TODO: add integration for any logging system
-            self.sd = None
+        self.gs = StorageHelper.factory(self.config, jobId=self.jobId)
+        self.logger = SDHelper(self.projectId, self.logName, jobId=self.jobId)
 
     @abc.abstractmethod
     def _dbConfig(self):
@@ -139,7 +118,7 @@ class SQLBase:
         # Note caller should override the sql in this function
         sql = None
         self._createDataset(datasetId, sql)
-
+        
     def _deleteDataset(self, sql):
         """
         Delete the specified schema (and all contained tables) from the database
@@ -532,9 +511,8 @@ class SQLBase:
         :param writeDisp: optional how to load the file (append, or overwrite) (default: append)
         """
 
-        gs = GSHelper(self.projectId)
         fileName = tableName + '.' + fileFormat
-        gs.downloadFile(source, fileName)
+        self.gs.downloadFile(source, fileName)
         self.loadDataFromFile(tableName, fileName, skipRows=skipRows, writeDisp=writeDisp, fileFormat=fileFormat)
         os.remove(fileName)
 
@@ -630,13 +608,12 @@ class SQLBase:
         df.to_csv(tableName + '.csv', index=False, header=True)
 
     @abc.abstractmethod
-    def exportDataToGCS(self, tableName, destination):
+    def exportDataToStorage(self, tableName, destination):
         """
         Extract data from a table and place it into a csv file in GCS
         :param tableName: the name of the table to load
         :param destination: the GS path
         """
         self.exportDataToFile(tableName)
-        gs = GSHelper(self.projectId)
-        gs.uploadFile(tableName + '.csv', destination)
+        self.gs.uploadFile(tableName + '.csv', destination)
         os.remove(tableName + '.csv')
