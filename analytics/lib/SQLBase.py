@@ -8,7 +8,7 @@ import json
 import abc
 
 from Connection import Connection
-from GSHelper import GSHelper
+from StorageHelper import StorageHelper
 from SDHelper import SDHelper
 
 class SQLBase:
@@ -37,7 +37,7 @@ class SQLBase:
             self.jobId = uuid.uuid4()
         else:
             self.jobId = jobId
-        self.gs = GSHelper(self.projectId)
+        self.gs = StorageHelper.factory(self.config, jobId=self.jobId)
         self.logger = SDHelper(self.projectId, self.logName, jobId=self.jobId)
 
     @abc.abstractmethod
@@ -511,9 +511,8 @@ class SQLBase:
         :param writeDisp: optional how to load the file (append, or overwrite) (default: append)
         """
 
-        gs = GSHelper(self.projectId)
         fileName = tableName + '.' + fileFormat
-        gs.downloadFile(source, fileName)
+        self.gs.downloadFile(source, fileName)
         self.loadDataFromFile(tableName, fileName, skipRows=skipRows, writeDisp=writeDisp, fileFormat=fileFormat)
         os.remove(fileName)
 
@@ -609,13 +608,12 @@ class SQLBase:
         df.to_csv(tableName + '.csv', index=False, header=True)
 
     @abc.abstractmethod
-    def exportDataToGCS(self, tableName, destination):
+    def exportDataToStorage(self, tableName, destination):
         """
         Extract data from a table and place it into a csv file in GCS
         :param tableName: the name of the table to load
         :param destination: the GS path
         """
         self.exportDataToFile(tableName)
-        gs = GSHelper(self.projectId)
-        gs.uploadFile(tableName + '.csv', destination)
+        self.gs.uploadFile(tableName + '.csv', destination)
         os.remove(tableName + '.csv')

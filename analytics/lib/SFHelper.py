@@ -8,11 +8,11 @@ import csv
 import datetime
 from salesforce_bulkipy import SalesforceBulkipy
 from simple_salesforce import Salesforce
-# from SDHelper import SDHelper
-# from GSHelper import GSHelper
-# from SQLHelper import SQLHelper
-# from JobState import JobState
-# from ETLHelper import ETLHelper
+from SDHelper import SDHelper
+from StorageHelper import StorageHelper
+from SQLHelper import SQLHelper
+from JobState import JobState
+from ETLHelper import ETLHelper
 
 class SFHelper:
     """
@@ -28,24 +28,12 @@ class SFHelper:
     """
 
     def __init__(self, config, objectName, splitSize=None, jobId='', maintainState=False, incremental=False):
-        """constructor
-        config = { 'project-id': '',
-                   'stage-bucket': '',
-                   'archive-bucket': '',
-                   'ddl-directory': '',
-                   'salesforce-user': '',
-                   'salesforce-password': '',
-                   'salesforce-token': '',
-                   'salesforce-sandbox': '' }
+        """constructor"""
 
-        objectName = 'Salesforce_table_name',
-        splitSize = int() # number of records per batch
-        """
-
-        self.project = config['project-id'] if 'project-id' in config.keys() else None
-        self.bucket = config['stage-bucket'] if 'stage-bucket' in config.keys() else None
-        self.archive = config['archive-bucket'] if 'archive-bucket' in config.keys() else None
-        self.ddlDir = config['ddl-directory'] if 'ddl-directory' in config.keys() else None
+        self.project = config['project-id']
+        self.bucket = config['stage-bucket']
+        self.archive = config['archive-bucket']
+        self.ddlDir = config['ddl-directory']
         self.config = config
         self.maintainState = maintainState
         self.incremental = incremental
@@ -57,33 +45,21 @@ class SFHelper:
             self.jobId = jobId
 
         # bring in the full object list
-        if self.ddlDir:
-            with open(self.ddlDir + '/salesforce-manifest.json') as json_data:
-                self.manifest = json.load(json_data)
-        else:
-            # TODO: How do we want to handle this in the future?
-            self.ddlDir = None
+        with open(self.ddlDir + '/salesforce-manifest.json') as json_data:
+            self.manifest = json.load(json_data)
 
-        if self.project:
-            self.gs = GSHelper(self.project)
-            self.sd = SDHelper(self.project, 'salesforce-log', self.jobId)
-        else:
-            # TODO: add integration for any bucket system
-            self.gs = None
-            # TODO: add integration for any logging system
-            self.sd = None
-
+        self.gs = StorageHelper.factory(config, jobId=self.jobId)
+        self.sd = SDHelper(self.project, 'salesforce-log', self.jobId)
         # authenticate against salesforce
         try:
             self.sf = SalesforceBulkipy(username=config['salesforce-user'], password=config['salesforce-password'],
                                         security_token=config['salesforce-token'], sandbox=config['salesforce-sandbox'])
             self.ssf = Salesforce(username=config['salesforce-user'], password=config['salesforce-password'],
-                                  security_token=config['salesforce-token'], sandbox=config['salesforce-sandbox'])
+                                  security_token=config['salesforce-token'])
         except Exception as sfErr:
             msg = 'SFHelper: Authentication against salesforce failed. Details: ' + str(sfErr)
             logging.error(msg)
-            if self.sd:
-                self.sd.logEvent(msg, severity='ERROR', jobstatus='STOPPED')
+            self.sd.logEvent(msg, severity='ERROR', jobstatus='STOPPED')
             raise StandardError(msg)
 
         self.setObjectName(objectName)
@@ -154,13 +130,13 @@ class SFHelper:
             attr['type'] = self.convertType(column['type'])
             attr['mode'] = 'nullable'
             schema.append(attr)
-
+            
         # save the ddl to a file if persist is set to true
         if persist:
             etl = ETLHelper(self.config)
             etl.schemaToFile(self.objectName.lower(), schema)
-
-        # return the schema to the caller
+        
+        # return the schema to the caller    
         return schema
 
     def _describe(self, source='salesforce'):
@@ -198,6 +174,27 @@ class SFHelper:
             except:
                 # if there is no local ddl, then pull from salesforce (i.e. refresh)
                 self.getSchema(persist=True)
+
+    def listAllObjects(self):
+        """
+        return a list of the objects available in salesforce
+        :return: list of dict
+        """
+        # pull in the full list
+        res = self.ssf.describe()
+        # create a briefer version
+        objects = []
+        # sort the fields by name
+        sortedObjects = sorted(res['sobjects'], key=lambda k: k['name'])
+        # loop through the objects
+        for row in sortedObjects:
+            info = {}
+            if row['queryable']:
+                info['name'] = row['name']
+                info['custom'] = row['custom']
+                info['desc'] = row['label']
+                objects.append(info)
+        return objects
 
     def checkForChange(self):
         """
@@ -260,8 +257,7 @@ class SFHelper:
             except Exception as sfErr:
                 msg = 'SFHelper.start: Unable to open up job for concurrent loads. Details: ' + str(sfErr)
                 logging.error(msg)
-                if self.sd:
-                    self.sd.logEvent(msg, severity='ERROR', jobstatus='STOPPED')
+                self.sd.logEvent(msg, severity='ERROR', jobstatus='STOPPED')
                 raise StandardError(msg)
 
             # build a dictionary to track batch status within
@@ -274,7 +270,7 @@ class SFHelper:
             self.start('insert')
 
         # pull the file into the pod
-        self.gs.downloadFile(self.bucket+'/'+fileName, fileName)
+        self.gs.downloadFile(fileName, fileName)
 
         # pull in the csv object
         try:
@@ -282,8 +278,7 @@ class SFHelper:
         except Exception as sfErr:
             msg = 'SFHelper.insert: Error likely in data content; unable to split csv file. Details: ' + str(sfErr)
             logging.error(msg)
-            if self.sd:
-                self.sd.logEvent(msg, severity='ERROR', jobstatus='STOPPED')
+            self.sd.logEvent(msg, severity='ERROR', jobstatus='STOPPED')
             raise StandardError(msg)
 
         # bulkipy takes care of splitting for us - 3rd arg is the split size
@@ -292,8 +287,7 @@ class SFHelper:
         except Exception as sfErr:
             msg = 'SFHelper.insert: Failure in submitting batches. Details: ' + str(sfErr)
             logging.error(msg)
-            if self.sd:
-                self.sd.logEvent(msg, severity='ERROR', jobstatus='STOPPED')
+            self.sd.logEvent(msg, severity='ERROR', jobstatus='STOPPED')
             raise StandardError(msg)
         else:
             # make sure the batch ids are legit
@@ -301,14 +295,13 @@ class SFHelper:
                 if not batch:
                     msg = 'SFHelper.insert: Did not receive valid batch id from service.'
                     logging.error(msg)
-                    if self.sd:
-                        self.sd.logEvent(msg, severity='ERROR', jobstatus='STOPPED')
+                    self.sd.logEvent(msg, severity='ERROR', jobstatus='STOPPED')
                     raise StandardError(msg)
             self.batchIds.extend(batchIds)
 
         # clean up the file and archive
         os.remove(fileName)
-        self.gs.moveFile(self.bucket, destBucket=self.archive, fileName=fileName)
+        self.gs.moveFile(fileName, destBucket=self.archive, destFile=fileName)
 
     def _wait(self, batchId):
         """wait for a single salesforce batch to complete"""
@@ -380,18 +373,13 @@ class SFHelper:
 
     def query(self, lastUpdateField='systemmodstamp'):
         """query the contents of a single table into a csv"""
-        # TODO: Set up last updated
-
         # make sure a job is open for processing
         if not self.isStarted:
             self.start('query')
 
         # make sure we have details about the object
         if self.columns is None:
-            # TODO: originally -> self.describe()
-            # When working with Saleforce this will throw an exception.  Need
-            # some logic to alter the "refresh" parameter on the fly.
-            self.describe(refresh=True)
+            self.describe()
 
         # bulkipy takes care of the API interactions
         try:
@@ -406,8 +394,7 @@ class SFHelper:
         except Exception as sfErr:
             msg = 'SFHelper.query: Failure in executing query batch. Details: ' + str(sfErr)
             logging.error(msg)
-            if self.sd:
-                self.sd.logEvent(msg, severity='ERROR', jobstatus='STOPPED')
+            self.sd.logEvent(msg, severity='ERROR', jobstatus='STOPPED')
             raise StandardError(msg)
 
         # wait for the job to complete
@@ -507,8 +494,7 @@ class SFHelper:
         except Exception as dbErr:
             msg = 'SFHelper.syncTable: Error/Issue moving \'' + objectName + '\' into the mart. Details: ' + str(dbErr)
             logging.error(msg)
-            if self.sd:
-                self.sd.logEvent(msg, severity='ERROR', jobstatus='END')
+            self.sd.logEvent(msg, severity='ERROR', jobstatus='END')
             if self.maintainState:
                 js.changeStatus('ERROR')
             raise StandardError(msg)
@@ -519,8 +505,7 @@ class SFHelper:
 
         msg = 'SFHelper.syncTable(): Completed salesforce sync for \'' + objectName + '\' (async follow-up)'
         logging.info(msg)
-        if self.sd:
-            self.sd.logEvent(msg, severity='INFO', jobstatus='END')
+        self.sd.logEvent(msg, severity='INFO', jobstatus='END')
 
     def syncAllTables(self):
         """
@@ -537,8 +522,7 @@ class SFHelper:
 
         msg = 'SFHelper.syncAllTables(): Completed salesforce sync for all requested objects (async follow-up)'
         logging.info(msg)
-        if self.sd:
-            self.sd.logEvent(msg, severity='INFO', jobstatus='END')
+        self.sd.logEvent(msg, severity='INFO', jobstatus='END')
 
     def updateAllTables(self):
         """
@@ -571,8 +555,7 @@ class SFHelper:
             except Exception as i2apErr:
                 msg = 'SFHelper.updateAllTables: Error/Issue dropping ' + objectName + '\' for replace. Details: ' + str(i2apErr)
                 logging.error(msg)
-                if self.sd:
-                    self.sd.logEvent(msg, severity='ERROR', jobstatus='INPROGRESS')
+                self.sd.logEvent(msg, severity='ERROR', jobstatus='INPROGRESS')
                 if self.maintainState:
                     js.changeStatus('ERROR')
                 raise StandardError(msg)
@@ -587,5 +570,4 @@ class SFHelper:
 
         msg = 'SFHelper.updateAllTables(): Completed salesforce drop/recreate for all requested objects (async follow-up)'
         logging.info(msg)
-        if self.sd:
-            self.sd.logEvent(msg, severity='INFO', jobstatus='END')
+        self.sd.logEvent(msg, severity='INFO', jobstatus='END')

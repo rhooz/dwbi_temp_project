@@ -6,7 +6,7 @@ class_path = os.environ['I2AP_LIB_DIRECTORY']
 sys.path.append(class_path)
 
 from BQHelper import BQHelper
-from GSHelper import GSHelper
+from StorageHelper import StorageHelper
 from RemoteDebug import *
 
 #
@@ -42,8 +42,8 @@ def prepare(context):
     context.bq = BQHelper(context.config)
     context.config['dataset'] = context.featurePrefix
     # setup / move file to GCS
-    context.gs = GSHelper(context.config)
-    context.gs.uploadFile(context.dataDir + '/bq_test_2.csv', context.bucket + '/bg_test_2.csv')
+    context.gs = StorageHelper(context.config)
+    context.gs.uploadFile(context.dataDir + '/bq_test_2.csv', 'bg_test_2.csv')
 
 @When("a request is made to load from GCS")
 def runthrough(context):
@@ -55,7 +55,7 @@ def evaluate(context):
     d = context.bq.getQueryAsDataframe(sql)
     print(d)
     assert len(d) == 6
-    context.gs.deleteFile(context.bucket, 'bg_test_2.csv')
+    context.gs.deleteFile('bg_test_2.csv')
 
 #
 # Scenario: Place data from bigquery into a file
@@ -66,7 +66,7 @@ def prepare(context):
     context.bq = BQHelper(context.config)
     context.config['dataset'] = context.featurePrefix
     # setup / move file to GCS
-    context.gs = GSHelper(context.config)
+    context.gs = StorageHelper.factory(context.config)
     try:
         os.remove('bq_test.csv')
         os.remove('bq_test_gcs.csv')
@@ -79,7 +79,7 @@ def runthrough(context):
 
 @When("a request to download table into GCS")
 def runthrough_2(context):
-    context.bq.exportDataToGCS('bq_test', context.bucket + '/bq_test_gcs.csv')
+    context.bq.exportDataToStorage('bq_test', context.bucket + '/bq_test_gcs.csv')
 
 @Then("the file is present locally")
 def evaluate(context):
@@ -91,10 +91,10 @@ def evaluate(context):
 
 @Then("the file is present in GCS")
 def evaluate_2(context):
-    context.gs.downloadFile(context.bucket + '/bq_test_gcs.csv', 'bq_test_gcs.csv')
+    context.gs.downloadFile('bq_test_gcs.csv', 'bq_test_gcs.csv')
     with open('bq_test_gcs.csv', 'r') as csvfile:
         rd = csv.reader(csvfile)
         count = sum(1 for row in rd)
     assert count == 7
     os.remove('bq_test_gcs.csv')
-    context.gs.deleteFile(context.bucket, 'bq_test_gcs.csv')
+    context.gs.deleteFile('bq_test_gcs.csv')

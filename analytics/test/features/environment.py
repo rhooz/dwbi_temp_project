@@ -3,8 +3,8 @@ import os
 
 class_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
 sys.path.append(class_path)
-from GSHelper import *
-from BQHelper import *
+from StorageHelper import StorageHelper
+from BQHelper import BQHelper
 
 
 # from ddlFlow import *
@@ -39,10 +39,18 @@ def before_all(context):
     config['salesforce-user'] = os.environ['I2AP_SALESFORCE_USER']
     config['salesforce-password'] = os.environ['I2AP_SALESFORCE_PASSWORD']
     config['salesforce-token'] = os.environ['I2AP_SALESFORCE_TOKEN']
+    config['storage-type'] = os.environ['I2AP_STORAGE_TYPE']
+    config['storage-project'] = os.environ['I2AP_STORAGE_PROJECT']
+    config['storage-key'] = os.environ['I2AP_STORAGE_KEY']
+    config['storage-secret'] = os.environ['I2AP_STORAGE_SECRET']
+    config['storage-user'] = os.environ['I2AP_STORAGE_USER']
+    config['storage-password'] = os.environ['I2AP_STORAGE_PASSWORD']
+    config['agent'] = os.environ['I2AP_AGENT']
     if os.environ['I2AP_SALESFORCE_SANDBOX'] == "True":
         config['salesforce-sandbox'] = True
     else:
         config['salesforce-sandbox'] = False
     context.config = config
-    context.gs = GSHelper(context.project)
+    context.gs = StorageHelper.factory(context.config, 'googlestorage')
+    context.gs.setBucket("behave-testing-bucket")
     context.bq = BQHelper(context.config)
