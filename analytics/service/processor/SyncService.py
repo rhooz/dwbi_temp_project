@@ -7,8 +7,10 @@ import logging
 import json
 import os
 import sys
+from RemoteDebug import *
 
 class_path = os.environ['I2AP_LIB_DIRECTORY']
+logfile = os.environ['I2AP_LOG_FILE']
 sys.path.append(class_path)
 
 from SFHelper import SFHelper
@@ -20,7 +22,7 @@ class SyncService(tornado.web.RequestHandler):
         self.jobId = str(uuid.uuid4())
         self.config = config
         self.logger = LogHelper.factory(self.config['project-id'], type="filelog", jobId=self.jobId,
-                                   destfile='/Users/rachelhughes/testlognew.log')
+                                   destfile=logfile)
 
     def verifyToken(self, clientId, clientSecret):
         if clientId == self.config['client-id'] and clientSecret == self.config['client-secret']:

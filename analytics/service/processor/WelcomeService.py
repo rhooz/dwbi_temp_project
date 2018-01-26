@@ -1,5 +1,7 @@
 import tornado.web
 from socket import gethostname
+from RemoteDebug import *
+
 
 class WelcomeService(tornado.web.RequestHandler):
     def initialize(self, config):

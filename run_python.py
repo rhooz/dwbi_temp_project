@@ -3,16 +3,17 @@
 from lib import *
 import os
 
-config = { 'salesforce-user': '',
-           'salesforce-password': "",
-           'salesforce-token': '',
-           'salesforce-sandbox': '',
-           'database-type': '',
-           'database-server': '',
-           'database-user': '',
-           'database-password': '',
-           'database-sid': '',
-           'database-port': '' }
+config = { 'salesforce-user': 'tommy.martin@gettectonic.com.devwynn',
+           'salesforce-password': "1 is the loneliest...",
+           'salesforce-token': 'bnNBltsTe0QgNoCXzb5WzaOj1',
+           'salesforce-sandbox': True,
+           'database-type': 'oracle',
+           'database-server': '172.18.0.1',
+           'database-user': 'readonlyuser',
+           'database-password': 'MyPassword',
+           'database-sid': 'RHTestDB',
+           'database-port': 1521 }
+
 
 objectName = 'Contact'
 

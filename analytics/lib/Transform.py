@@ -17,6 +17,7 @@ class Transform:
         self.project = config['project-id']
         self.bucket = config['stage-bucket']
         self.archiveBucket = config['archive-bucket']
+        self.logfile = config['logfile']
         self.fileName = fileName
         if fileName == '':
             self.type = 'SQL'
@@ -36,7 +37,7 @@ class Transform:
         #self.gs = GSHelper(self.project)
         self.bq = SQLHelper.factory(self.config, dbType, jobId=self.jobId)
         self.logger = LogHelper.factory(self.config['project-id'], type="filelog", jobId=self.jobId,
-                                   destfile='/Users/rachelhughes/testlognew.log')
+                                   destfile=logfile)
         self.ddlDir = config['ddl-directory']
         self.sqlDir = config['sql-directory']
 

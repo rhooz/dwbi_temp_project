@@ -12,7 +12,7 @@ from simple_salesforce import Salesforce
 # from GSHelper import GSHelper
 # from SQLHelper import SQLHelper
 # from JobState import JobState
-# from ETLHelper import ETLHelper
+from ETLHelper import ETLHelper
 
 class SFHelper:
     """
