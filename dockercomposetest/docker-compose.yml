@@ -20,6 +20,6 @@ services:
     container_name: python
     hostname: python
     volumes:
-      - /Users/tommymartin/Git:/usr/local/src/mystuff
+      - /Users/tommymartin/Programming/Davita/dwbi_temp_project/dva_python:/code
     links:
       - oracle

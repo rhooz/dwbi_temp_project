@@ -15,3 +15,32 @@ if __name__ == '__main__':
     # sfh.describe(refresh=True)
 
     sfh.query()
+
+def test(**config):
+    print type(config)
+    for key, value in config.iteritems():
+        print key, value
+
+class Test(object):
+
+    _i = 3
+    h = 100
+
+    @property
+    def i(self):
+        return type(self)._i
+
+    @i.setter
+    def i(self,val):
+        self.__class__._i = val
+
+
+class Test(object): pass
+t = Test()
+print type(t) is t.__class__
+print type(t)
+
+class Test(): pass
+t = Test()
+print type(t) is t.__class__
+print type(t)

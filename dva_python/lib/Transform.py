@@ -4,9 +4,9 @@ import uuid
 import os
 import io
 
-from StorageHelper import StorageHelper
+from GSHelper import GSHelper
 from SQLHelper import SQLHelper
-from LogHelper import LogHelper
+from SDHelper import SDHelper
 from JobState import JobState
 
 class Transform:
@@ -17,7 +17,6 @@ class Transform:
         self.project = config['project-id']
         self.bucket = config['stage-bucket']
         self.archiveBucket = config['archive-bucket']
-        self.logfile = config['logfile']
         self.fileName = fileName
         if fileName == '':
             self.type = 'SQL'
@@ -34,21 +33,20 @@ class Transform:
 
         self.config = config
         self.maintainState = maintainState
-        self.gs = StorageHelper.factory(self.config, jobId=self.jobId)
+        self.gs = GSHelper(self.project)
         self.bq = SQLHelper.factory(self.config, dbType, jobId=self.jobId)
-        self.logger = LogHelper.factory(self.config['project-id'], type="filelog", jobId=self.jobId,
-                                   destfile=logfile)
+        self.logger = SDHelper(self.project, 'processing-log', jobId=self.jobId)
         self.ddlDir = config['ddl-directory']
         self.sqlDir = config['sql-directory']
 
     def pullFile(self):
         """pull the source file into a dataframe for transform"""
         # pull the file from google storage into an in memory dataframe
-        self.df = pd.read_csv(io.StringIO(self.gs.streamFile(self.fileName).decode('ISO-8859-1')), dtype=object, keep_default_na=False)
+        self.df = pd.read_csv(io.StringIO(self.gs.readFile(self.bucket + '/' + self.fileName).decode('ISO-8859-1')), dtype=object, keep_default_na=False)
 
     def archiveFile(self):
         """archive the processed file"""
-        self.gs.moveFile(self.fileName, destBucket=self.archiveBucket, destFile=self.fileName)
+        self.gs.moveFile(self.bucket, self.archiveBucket, self.fileName)
 
     def addTransformations(self):
         """create new columns, etc to prepare the data for salesforce load"""
@@ -84,7 +82,7 @@ class Transform:
         # create a temp table containing the category only data for the object
         self.bq.createTableAs('temp_' + category, sql)
         # save that file out to GCS
-        self.bq.exportDataToStorage('temp_' + category, 'gs://' + self.bucket + '/' + category + '.csv')
+        self.bq.exportDataToGCS('temp_' + category, 'gs://' + self.bucket + '/' + category + '.csv')
 
     def pullSQL(self):
         """pull the SQL file and apply the parameters"""

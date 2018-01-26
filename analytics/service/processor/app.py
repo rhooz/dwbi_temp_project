@@ -7,10 +7,10 @@ import os
 from WelcomeService import WelcomeService
 from FileToDbService import FileToDbService
 from DbToDbService import DbToDbService
-from EmailService import EmailService
-from GraphicService import GraphicService
-from LinkService import LinkService
-from ReplicatorService import ReplicatorService
+#from EmailService import EmailService
+#from GraphicService import GraphicService
+#from LinkService import LinkService
+#from ReplicatorService import ReplicatorService
 from SyncService import SyncService
 
 from RemoteDebug import *

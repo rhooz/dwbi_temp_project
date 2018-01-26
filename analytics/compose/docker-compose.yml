@@ -1,0 +1,73 @@
+version: '2'
+services:
+
+  oracle:
+    image: oracle/database:12.2.0.1-se2
+    container_name: oracle
+    hostname: oracle
+    ports:
+      - 1521:1521
+      - 5500:5500
+    environment:
+       ORACLE_SID: "RHTestDB"
+       ORACLE_PWD: "D4V!t4T3st"
+    shm_size: 8g
+    volumes:
+      - /Users/rachelhughes/github/Davita/dwbi_temp_project/OracleDatabase/samples/customscripts:/opt/oracle/scripts/startup
+      - /Users/rachelhughes/oracle:/opt/oracle/oradata
+
+  processor:
+    image: us.gcr.io/tt-cust-analytics/i2ap-processor:1.0.28
+    stdin_open: true
+    tty: true
+    container_name: processor
+    restart: unless-stopped
+    hostname: processor
+    ports:
+      - 3101:3101
+    volumes:
+      - /Users/rachelhughes/github/Davita/dwbi_temp_project/analytics:/usr/local/src/mystuff
+      - /Users/rachelhughes/github/Davita/dwbi_temp_project/analytics/docker:/secrets
+      - /Users/rachelhughes/github/Davita/dwbi_temp_project/analytics/content:/css
+      - /Users/rachelhughes/github/Davita/dwbi_temp_project/analytics/content:/template
+      - /Users/rachelhughes/github/Davita/dwbi_temp_project/analytics:/i2ap-processor/log
+    environment:
+      I2AP_PROJECT_ID: "tt-cust-analytics"
+      I2AP_STAGE_BUCKET: "tt-cust-analytics-stage"
+      I2AP_ARCHIVE_BUCKET: "tt-cust-analytics-archive"
+      I2AP_GRAPH_BUCKET: "tt-cust-analytics-graphs"
+      I2AP_PORT: "3101"
+      I2AP_OVERRIDE_PORT: ""
+      I2AP_DATASET: "analytics_lake"
+      I2AP_DDL_DIRECTORY: "/usr/local/src/mystuff/ddl"
+      I2AP_LIB_DIRECTORY: "/usr/local/src/mystuff/lib"
+      I2AP_CLIENT_SECRET: "asd123asd123"
+      I2AP_CLIENT_ID: "my-special-dva@davita.com"
+      I2AP_DATA_SERVICE: "http://localhost"
+      I2AP_EMAIL_ID: "tectonic.api.email@gmail.com"
+      I2AP_EMAIL_NAME: "Tectonic LLC"
+      I2AP_EMAIL_PASSWORD: "t3ct0n1c"
+      I2AP_ZONE: "us-west1-c"
+      I2AP_REGION: "us-west1"
+      I2AP_SQL_DIRECTORY: "/usr/local/src/mystuff/sql"
+      I2AP_STATE_BUCKET: "tt-cust-analytics-state"
+      I2AP_FEATURE_PREFIX: "testFeature"
+      GOOGLE_STORAGE_ID: "GOOG2HNKQDLTY6BPFFNX"
+      GOOGLE_STORAGE_SECRET: "Al2MK6abEE8OLhEWWihzdpIz53UsTmCMCY+mJlu3"
+      INTERACTIVE: "true"
+      I2AP_MART_TYPE: "postgres"
+      I2AP_MART_SERVER: "local-cloudsql-proxy"
+      I2AP_MART_PORT: "5432"
+      I2AP_MART_NAME: "commix"
+      I2AP_MART_USER: "postgres"
+      I2AP_MART_PASSWORD: "T3ct0n1c"
+      I2AP_LOG_NAME: "processing-log"
+      I2AP_SALESFORCE_USER: "tyler.allbritton@gettectonic.com"
+      I2AP_SALESFORCE_PASSWORD: "R0ck1nData"
+      I2AP_SALESFORCE_TOKEN: "pfaNEOAQ0Zchh3a5ETNg7GHhW"
+      I2AP_SALESFORCE_SANDBOX: "False"
+      I2AP_LOG_FILE: "/i2ap-processor/logfile.log"
+      REMOTE_DEBUG: "10.176.80.205"
+      REMOTE_DEBUG_PORT: "51234"
+    links:
+      - oracle

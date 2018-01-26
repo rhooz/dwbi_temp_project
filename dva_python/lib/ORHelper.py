@@ -14,7 +14,6 @@ class ORHelper(SQLBase):
         :param genericType: the generic I2AP type
         :return: the database specifc type
         """
-        # SF types = set(['DATE', 'BOOLEAN', 'FLOAT', 'STRING', 'DATETIME'])
         if genericType.upper() == 'STRING':
             returnType = 'NVARCHAR2(2000)'
         elif genericType.upper() == 'INTEGER':
@@ -157,74 +156,8 @@ class ORHelper(SQLBase):
             raise StandardError(msg)
 
         # clean up temp table
-        # TODO: do we want to remove the csv after completion? Do we care to?
         # if skipRows >= 1:
         #     os.remove(fileName)
-
-    def updateTable(self, tableName, schema, newTable, keyFieldList):
-        """
-        Update every value in a currently existing table with data from a new table by key
-        Addtionally, insert every row from new table not already present in the old
-        :param tableName: The name of the table to be updated
-        :param schema: the ddl or "schema" definition of the table
-        :param newTable: The name of the temporary table containing the new values
-        :param keyFieldList: The list of fields that uniquely identify the record to be updated
-        """
-
-        # TODO: get this class working with Oracle; nothing has been done here yet
-
-        # Note caller MAY need override the sql in this function; ANSI standard provided here
-        sql = 'UPDATE ' + tableName + ' curr SET '
-        # Add the set statement for non-key fields
-        needComma = False
-        for column in schema:
-            if column['name'] not in keyFieldList:
-                if needComma:
-                    sql += ', '
-                sql += column['name'] + ' = new.' + column['name']
-                needComma = True
-        # add in the source of the updates
-        sql += ' FROM ' + newTable + ' new WHERE '
-        # add the primary key part of the join clause
-        needAnd = False
-        for key in keyFieldList:
-            if needAnd:
-                sql += 'AND '
-            sql += 'curr.' + key + ' = new.' + key + ' '
-            needAnd = True
-        # update the matching fields
-        self._updateTable(tableName, sql)
-
-        # grab the full set of comma separated fields
-        fieldsPlain = ''
-        fieldsNew = ''
-        needComma = False
-        for column in schema:
-            if needComma:
-                fieldsPlain += ', '
-                fieldsNew += ', '
-            fieldsPlain += column['name']
-            fieldsNew += 'new.' + column['name']
-            needComma = True
-
-        sql = 'INSERT INTO ' + tableName + ' (' + fieldsPlain + ') ' + \
-              'SELECT ' + fieldsNew + ' ' + \
-              'FROM ' + tableName + ' curr ' + \
-              'RIGHT OUTER JOIN ' + newTable + ' new ON '
-        # add the primary key part of the join clause
-        # put together the where clause at the same time
-        where = 'WHERE '
-        needAnd = False
-        for key in keyFieldList:
-            if needAnd:
-                sql += 'AND '
-            sql += 'curr.' + key + ' = new.' + key + ' '
-            where += 'curr.' + key + ' IS NULL '
-            needAnd = True
-        # add in the where clause
-        sql += where
-        # insert the new data
-        self._execDML(sql, 'updateTable')
 
     # def createDataset(self, datasetId):
     #     """
