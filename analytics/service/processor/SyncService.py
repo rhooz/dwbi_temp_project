@@ -10,8 +10,8 @@ import sys
 from RemoteDebug import *
 
 class_path = os.environ['I2AP_LIB_DIRECTORY']
-logfile = os.environ['I2AP_LOG_FILE']
 sys.path.append(class_path)
+logfile = os.environ['I2AP_LOG_FILE']
 
 from SFHelper import SFHelper
 from LogHelper import LogHelper
@@ -180,6 +180,7 @@ class SyncService(tornado.web.RequestHandler):
                     response['status'] = '500 Internal Server Error'
                     self.set_status(500)
                 else:
+
                     if allObjects:
                         logging.info('Executing sync for all objects')
                     else:

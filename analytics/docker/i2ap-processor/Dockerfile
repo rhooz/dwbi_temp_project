@@ -61,6 +61,9 @@ RUN pip install --upgrade ujson
 # add database libraries
 RUN pip install cx-oracle
 
+# add database libraries
+RUN pip install minio
+
 # build Oracle client
 ADD oracle-instantclient*.rpm /tmp/
 RUN  yum -y install /tmp/oracle-instantclient*.rpm && \

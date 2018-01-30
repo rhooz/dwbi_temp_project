@@ -3,7 +3,7 @@ import abc
 import uuid
 import re
 
-from SDHelper import SDHelper
+from LogHelper import LogHelper
 
 class StorageBase:
     """
@@ -22,13 +22,16 @@ class StorageBase:
         self.storageType = config['storage-type']
         self.bucket = config['stage-bucket']
         self.logName = config['log-name']
+        self.logfile = config['log-file']
+
         self._storeConfig()
 
         if jobId == '':
             self.jobId = uuid.uuid4()
         else:
             self.jobId = jobId
-        self.logger = SDHelper(self.projectId, self.logName, jobId=self.jobId)
+        self.logger = self.logger = LogHelper.factory(self.config['project-id'], type="filelog", jobId=self.jobId,
+                                   destfile=self.logfile)
 
     @abc.abstractmethod
     def _storeConfig(self):

@@ -9,7 +9,7 @@ import abc
 
 from Connection import Connection
 from StorageHelper import StorageHelper
-from SDHelper import SDHelper
+from LogHelper import LogHelper
 
 class SQLBase:
     """
@@ -38,7 +38,7 @@ class SQLBase:
         else:
             self.jobId = jobId
         self.gs = StorageHelper.factory(self.config, jobId=self.jobId)
-        self.logger = SDHelper(self.projectId, self.logName, jobId=self.jobId)
+        self.logger = LogHelper(self.projectId, self.logName, jobId=self.jobId)
 
     @abc.abstractmethod
     def _dbConfig(self):

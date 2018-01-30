@@ -16,6 +16,47 @@ services:
       - /Users/rachelhughes/github/Davita/dwbi_temp_project/OracleDatabase/samples/customscripts:/opt/oracle/scripts/startup
       - /Users/rachelhughes/oracle:/opt/oracle/oradata
 
+  minio1:
+    image: minio/minio
+    volumes:
+     - minio-data1:/export
+    ports:
+     - "9001:9000"
+    environment:
+     MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
+     MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    command: server http://minio1/export http://minio2/export http://minio3/export http://minio4/export
+  minio2:
+    image: minio/minio
+    volumes:
+     - minio-data2:/export
+    ports:
+     - "9002:9000"
+    environment:
+     MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
+     MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    command: server http://minio1/export http://minio2/export http://minio3/export http://minio4/export
+  minio3:
+    image: minio/minio
+    volumes:
+     - minio-data3:/export
+    ports:
+     - "9003:9000"
+    environment:
+     MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
+     MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    command: server http://minio1/export http://minio2/export http://minio3/export http://minio4/export
+  minio4:
+    image: minio/minio
+    volumes:
+     - minio-data4:/export
+    ports:
+     - "9004:9000"
+    environment:
+     MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
+     MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    command: server http://minio1/export http://minio2/export http://minio3/export http://minio4/export
+
   processor:
     image: us.gcr.io/tt-cust-analytics/i2ap-processor:1.0.28
     stdin_open: true
@@ -66,8 +107,24 @@ services:
       I2AP_SALESFORCE_PASSWORD: "R0ck1nData"
       I2AP_SALESFORCE_TOKEN: "pfaNEOAQ0Zchh3a5ETNg7GHhW"
       I2AP_SALESFORCE_SANDBOX: "False"
+      I2AP_STORAGE_TYPE: "minio"
+      I2AP_STORAGE_PROJECT: "minio1:9000"
+      I2AP_STORAGE_KEY: "AKIAIOSFODNN7EXAMPLE"
+      I2AP_STORAGE_SECRET: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
       I2AP_LOG_FILE: "/i2ap-processor/logfile.log"
-      REMOTE_DEBUG: "10.6.23.143"
+      REMOTE_DEBUG: "10.176.80.225"
       REMOTE_DEBUG_PORT: "51234"
     links:
       - oracle
+      - minio1
+      - minio2
+      - minio3
+      - minio4
+
+## By default this config uses default local driver,
+## For custom volumes replace with volume driver configuration.
+volumes:
+  minio-data1:
+  minio-data2:
+  minio-data3:
+  minio-data4:

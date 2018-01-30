@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-from BQHelper import BQHelper
-from PGHelper import PGHelper
+#from BQHelper import BQHelper
+#from PGHelper import PGHelper
+from ORHelper import ORHelper
 
 class SQLHelper(object):
     """
@@ -26,6 +27,8 @@ class SQLHelper(object):
             return(BQHelper(config, jobId))
         elif type == "postgres":
             return(PGHelper(config, jobId))
+        elif type == "oracle":
+            return(ORHelper(config, jobId))
         else:
             raise TypeError('Invalid datatabse type')
     factory = staticmethod(factory)

@@ -8,12 +8,12 @@ import csv
 import datetime
 from salesforce_bulkipy import SalesforceBulkipy
 from simple_salesforce import Salesforce
-from SDHelper import SDHelper
+from LogHelper import LogHelper
 from StorageHelper import StorageHelper
 from SQLHelper import SQLHelper
 from JobState import JobState
 from ETLHelper import ETLHelper
-from RemoteDebug import *
+#from RemoteDebug import *
 
 class SFHelper:
     """
@@ -50,7 +50,7 @@ class SFHelper:
             self.manifest = json.load(json_data)
 
         self.gs = StorageHelper.factory(config, jobId=self.jobId)
-        self.sd = SDHelper(self.project, 'salesforce-log', self.jobId)
+        self.sd = LogHelper(self.project, 'salesforce-log', self.jobId)
         # authenticate against salesforce
         try:
             self.sf = SalesforceBulkipy(username=config['salesforce-user'], password=config['salesforce-password'],

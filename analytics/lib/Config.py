@@ -113,6 +113,10 @@ class Config:
         except:
             config['log-name'] = ''
         try:
+            config['log-file'] = os.environ['I2AP_LOG_FILE']
+        except:
+            config['log-file'] = ''
+        try:
             config['salesforce-user'] = os.environ['I2AP_SALESFORCE_USER']
         except:
             config['salesforce-user'] = ''

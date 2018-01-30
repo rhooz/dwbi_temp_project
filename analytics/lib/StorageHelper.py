@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from GSHelper import GSHelper
+#from GSHelper import GSHelper
 from MIHelper import MIHelper
-from FTPHelper import FTPHelper
+#from FTPHelper import FTPHelper
 
 class StorageHelper(object):
     """
